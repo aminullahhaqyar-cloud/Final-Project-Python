@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{{ action }} Book · LibraryMS{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <h1>{{ action }} Book</h1>
+
+  <form method="POST" class="card-form">
+    <div class="form-group">
+      <label for="title">Title *</label>
+      <input type="text" id="title" name="title" required
+             value="{{ book.title if book else '' }}" />
+    </div>
+    <div class="form-group">
+      <label for="author">Author *</label>
+      <input type="text" id="author" name="author" required
+             value="{{ book.author if book else '' }}" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="language">Language *</label>
+        <input type="text" id="language" name="language" required
+               value="{{ book.language if book else '' }}" />
+      </div>
+      <div class="form-group">
+        <label for="publication_year">Publication Year</label>
+        <input type="number" id="publication_year" name="publication_year"
+               min="1000" max="2100"
+               value="{{ book.publication_year if book else '' }}" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="isbn">ISBN</label>
+        <input type="text" id="isbn" name="isbn"
+               value="{{ book.isbn if book else '' }}" />
+      </div>
+      <div class="form-group">
+        <label for="genre">Genre</label>
+        <input type="text" id="genre" name="genre"
+               value="{{ book.genre if book else '' }}" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4">{{ book.description if book else '' }}</textarea>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">{{ action }} Book</button>
+      <a href="{{ url_for('books') }}" class="btn-outline">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

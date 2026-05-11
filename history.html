@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Checkout History · LibraryMS{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Checkout History</h1>
+</div>
+
+{% if checkouts %}
+<table class="data-table">
+  <thead>
+    <tr>
+      {% if current_user().is_staff %}<th>Member</th>{% endif %}
+      <th>Book</th>
+      <th>Checked Out</th>
+      <th>Due Date</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for co in checkouts %}
+    <tr class="{{ 'overdue-row' if co.is_overdue else '' }}">
+      {% if current_user().is_staff %}<td>{{ co.user.name }}</td>{% endif %}
+      <td><a href="{{ url_for('book_detail', book_id=co.book_id) }}">{{ co.book.title }}</a></td>
+      <td>{{ co.checked_out_at.strftime('%b %d, %Y') }}</td>
+      <td>{{ co.due_date.strftime('%b %d, %Y') if co.due_date else '—' }}</td>
+      <td>
+        {% if co.returned %}
+          <span class="badge available">Returned</span>
+        {% elif co.is_overdue %}
+          <span class="badge unavailable">Overdue</span>
+        {% else %}
+          <span class="badge neutral">Active</span>
+        {% endif %}
+      </td>
+      <td>
+        {% if not co.returned and (current_user().is_staff or co.user_id == current_user().id) %}
+          <form method="POST" action="{{ url_for('return_book', checkout_id=co.id) }}">
+            <button type="submit" class="btn-sm">Return</button>
+          </form>
+        {% else %}—{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-state">No checkout records found.</p>
+{% endif %}
+{% endblock %}

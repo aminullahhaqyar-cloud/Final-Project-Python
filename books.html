@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Books · LibraryMS{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>Book Catalogue</h1>
+  {% if current_user() and current_user().is_staff %}
+    <a href="{{ url_for('add_book') }}" class="btn-primary">+ Add Book</a>
+  {% endif %}
+</div>
+
+<form class="search-bar" method="GET" action="{{ url_for('books') }}">
+  <input type="text" name="q" value="{{ query }}" placeholder="Search by title, author, genre, ISBN…" />
+  <select name="language">
+    <option value="">All Languages</option>
+    {% for lang in languages %}
+      <option value="{{ lang }}" {% if lang == language %}selected{% endif %}>{{ lang }}</option>
+    {% endfor %}
+  </select>
+  <label class="checkbox-label">
+    <input type="checkbox" name="available_only" {% if available_only %}checked{% endif %}> Available only
+  </label>
+  <button type="submit" class="btn-primary">Search</button>
+  {% if query or language or available_only %}
+    <a href="{{ url_for('books') }}" class="btn-outline">Clear</a>
+  {% endif %}
+</form>
+
+<p class="result-count">{{ books|length }} book{{ 's' if books|length != 1 }} found</p>
+
+{% if books %}
+<div class="book-grid">
+  {% for book in books %}
+  <a class="book-card" href="{{ url_for('book_detail', book_id=book.id) }}">
+    <div class="book-cover">{{ book.title[0] }}</div>
+    <div class="book-info">
+      <h3>{{ book.title }}</h3>
+      <p class="author">{{ book.author }}</p>
+      <p class="meta">{{ book.language }}{% if book.publication_year %} · {{ book.publication_year }}{% endif %}</p>
+      {% if book.genre %}<p class="genre-tag">{{ book.genre }}</p>{% endif %}
+      <span class="badge {{ 'available' if book.available else 'unavailable' }}">
+        {{ 'Available' if book.available else 'Checked Out' }}
+      </span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<p class="empty-state">No books found. Try a different search.</p>
+{% endif %}
+{% endblock %}

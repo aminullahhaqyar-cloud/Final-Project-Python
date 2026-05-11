@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Login · LibraryMS{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>Welcome Back</h1>
+    <p>Log in to your account to borrow books.</p>
+    <form method="POST" class="card-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required autofocus />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+      </div>
+      <button type="submit" class="btn-primary full-width">Log In</button>
+    </form>
+    <p class="auth-switch">Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+    <p class="hint">Demo admin: admin@library.com / admin123</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ book.title }} · LibraryMS{% endblock %}
+
+{% block content %}
+<div class="detail-layout">
+  <div class="detail-cover">{{ book.title[0] }}</div>
+
+  <div class="detail-info">
+    <h1>{{ book.title }}</h1>
+    <p class="author-large">by {{ book.author }}</p>
+
+    <table class="meta-table">
+      <tr><th>Language</th><td>{{ book.language }}</td></tr>
+      {% if book.publication_year %}<tr><th>Year</th><td>{{ book.publication_year }}</td></tr>{% endif %}
+      {% if book.isbn %}<tr><th>ISBN</th><td>{{ book.isbn }}</td></tr>{% endif %}
+      {% if book.genre %}<tr><th>Genre</th><td>{{ book.genre }}</td></tr>{% endif %}
+      <tr><th>Status</th>
+        <td><span class="badge {{ 'available' if book.available else 'unavailable' }}">
+          {{ 'Available' if book.available else 'Checked Out' }}
+        </span></td>
+      </tr>
+    </table>
+
+    {% if book.description %}<p class="description">{{ book.description }}</p>{% endif %}
+
+    <div class="action-buttons">
+      {% if current_user() %}
+        {% if book.available %}
+          <form method="POST" action="{{ url_for('checkout_book', book_id=book.id) }}" class="inline-form">
+            <label for="due_date">Due date:</label>
+            <input type="date" name="due_date" id="due_date" required
+                   min="{{ today }}" style="margin: 0 8px;" />
+            {% if current_user().is_staff %}
+              <!-- Staff can select a member to check out on behalf of -->
+              <button type="submit" class="btn-primary">Check Out</button>
+            {% else %}
+              <button type="submit" class="btn-primary">Check Out</button>
+            {% endif %}
+          </form>
+        {% else %}
+          {% set co = book.current_checkout %}
+          {% if co and (current_user().is_staff or co.user_id == current_user().id) %}
+            <form method="POST" action="{{ url_for('return_book', checkout_id=co.id) }}">
+              <button type="submit" class="btn-outline">Return Book</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      {% else %}
+        <a href="{{ url_for('login') }}" class="btn-primary">Log in to Check Out</a>
+      {% endif %}
+
+      {% if current_user() and current_user().is_staff %}
+        <a href="{{ url_for('edit_book', book_id=book.id) }}" class="btn-outline">Edit Book</a>
+        {% if book.available %}
+          <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}"
+                onsubmit="return confirm('Delete this book permanently?')">
+            <button type="submit" class="btn-danger">Delete</button>
+          </form>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<section class="history-section">
+  <h2>Checkout History</h2>
+  {% if history %}
+  <table class="data-table">
+    <thead>
+      <tr><th>Member</th><th>Checked Out</th><th>Due Date</th><th>Returned</th></tr>
+    </thead>
+    <tbody>
+      {% for co in history %}
+      <tr class="{{ 'overdue-row' if co.is_overdue else '' }}">
+        <td>{{ co.user.name }}</td>
+        <td>{{ co.checked_out_at.strftime('%b %d, %Y') }}</td>
+        <td>{{ co.due_date.strftime('%b %d, %Y') if co.due_date else '—' }}
+          {% if co.is_overdue %}<span class="badge unavailable">Overdue</span>{% endif %}</td>
+        <td>{{ co.returned_at.strftime('%b %d, %Y') if co.returned_at else ('Active' if not co.returned else '—') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="empty-state">No checkout history for this book.</p>
+  {% endif %}
+</section>
+{% endblock %}

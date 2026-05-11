@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Home · LibraryMS{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Welcome to LibraryMS</h1>
+  <p>Your modern library management system — discover, borrow, and explore.</p>
+  <a href="{{ url_for('books') }}" class="btn-primary">Browse All Books</a>
+</section>
+
+<section class="stats-row">
+  <div class="stat-card">
+    <span class="stat-number">{{ total_books }}</span>
+    <span class="stat-label">Total Books</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number">{{ available_books }}</span>
+    <span class="stat-label">Available Now</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-number">{{ total_members }}</span>
+    <span class="stat-label">Members</span>
+  </div>
+</section>
+
+<section class="recent-section">
+  <h2>Recently Added</h2>
+  <div class="book-grid">
+    {% for book in recent_books %}
+    <a class="book-card" href="{{ url_for('book_detail', book_id=book.id) }}">
+      <div class="book-cover">{{ book.title[0] }}</div>
+      <div class="book-info">
+        <h3>{{ book.title }}</h3>
+        <p class="author">{{ book.author }}</p>
+        <p class="meta">{{ book.language }}{% if book.publication_year %} · {{ book.publication_year }}{% endif %}</p>
+        <span class="badge {{ 'available' if book.available else 'unavailable' }}">
+          {{ 'Available' if book.available else 'Checked Out' }}
+        </span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
